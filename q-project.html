@@ -1,0 +1,144 @@
+<!--Dominick Miller-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+	<title>Rotating 3D Shape</title>
+            
+            <script id="vertex-shader" type="x-shader/x-vertex">
+                attribute vec4 myPosition;
+
+		uniform float alpha;
+		uniform float beta;
+		uniform float gamma;
+		uniform float Xtrans;
+		uniform float Ytrans;
+		uniform float Xscale;
+		uniform float Yscale;
+		mat4 M_s, M_t, M_x, M_y, M_z;
+
+		uniform vec3 a;
+		uniform vec3 vUp;
+		uniform vec3 e;
+		vec3 d, n, k, u, l, v;
+	    	mat4 M;
+		uniform mat4 P;
+
+		void main() {
+            	//columnwise standard matrices
+            
+            		//rotation around the x axis
+			M_x = mat4(
+			1, 0, 0, 0,
+			0, cos(alpha), -sin(alpha), 0,
+			0, sin(alpha), cos(alpha), 0,
+			0, 0, 0, 1);
+			
+        		//rotation around the y axis
+			M_y = mat4(
+			cos(beta), 0, -sin(beta), 0,
+			0, 1, 0, 0,
+			sin(beta), 0, cos(beta), 0,
+			0, 0, 0, 1);	
+			
+			//rotation around the z axis
+			M_z = mat4(
+			cos(gamma), -sin(gamma), 0, 0,
+			sin(gamma), cos(gamma), 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1);
+			
+            		//translation matrix
+            //amount of translation determined by Xtrans and Ytrans
+			M_t = mat4(
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			Xtrans, Ytrans, 0, 1);
+
+            		//scaling matrix
+            //amount scaled determined by Xscale and Yscale
+			M_s = mat4(
+			Xscale, 0, 0, 0,
+			0, Yscale, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1);
+
+			gl_PointSize = 10.0;
+
+	/*Model View Matrix*/
+			gl_PointSize = 1.0;
+
+		     //The view1 plane normal
+			//difference of a, e
+			d = e - a;
+			//normalize the vector.
+			n = normalize(d);
+		
+		     //the view1 plane horizontal axis
+			//k = vup cross n
+			k = cross(vUp, n);
+			//normalize the vector
+			u = normalize(k);
+
+		     //view1 plane vertical axis
+			//l = n cross u
+			l = cross(n, u);
+			//normalize the vector
+			v = normalize(l);
+
+			//Model view1 matrix.
+			M = mat4(
+			u[0], v[0], n[0], 0,
+			u[1], v[1], n[1], 0,
+			u[2], v[2], n[2], 0,
+			-e[0]*u[0]-e[1]*u[1]-e[2]*u[2],
+			-e[0]*v[0]-e[1]*v[1]-e[2]*v[2],
+			-e[0]*n[0]-e[1]*n[1]-e[2]*n[2],
+			1);
+
+			gl_Position = P*M*M_s*M_t*M_x*M_y*M_z*myPosition;
+					
+		}
+            </script>
+            
+            <script id="fragment-shader" type="x-shader/x-fragment">
+                precision mediump float;
+		uniform vec4 color;
+            	void main() {           		
+			gl_FragColor = color;
+		}
+
+	    </script>
+            
+            <script type="text/javascript" src="Common/webgl-utils.js"></script>
+            <script type="text/javascript" src="Common/initShaders.js"></script>
+            <script type="text/javascript" src="Common/MV.js"></script>
+        
+            <script type="text/javascript" src="q-project.js"></script>
+            
+    </head>
+    
+    <body onload = "init()" onkeydown="rotateShape(event)">
+        <canvas id="gl-canvas" width="512" height="512"></canvas><br/>
+    </body>
+    <br>
+	<button id "addNode" onclick="addNode()">
+	    Add Node
+	</button>
+    </br>
+    <br>
+	<button id "editX" onclick="editX()">
+	    Edit X
+	</button>
+	<button id "editY" onclick="editY()">
+	    Edit Y
+	</button>
+	<button id "editZ" onclick="editZ()">
+	    Edit Z
+	</button>
+    </br>
+
+</html>
+
+
